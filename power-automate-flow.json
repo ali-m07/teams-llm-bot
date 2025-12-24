@@ -1,0 +1,105 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "title": "User Message"
+              },
+              "userId": {
+                "type": "string"
+              },
+              "userName": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string"
+              }
+            },
+            "required": ["message"]
+          }
+        }
+      }
+    },
+    "actions": {
+      "Call_OpenAI": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "https://api.openai.com/v1/chat/completions",
+          "headers": {
+            "Authorization": "Bearer @{parameters('OpenAI_API_Key')}",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+              {
+                "role": "system",
+                "content": "You are a helpful assistant in Microsoft Teams."
+              },
+              {
+                "role": "user",
+                "content": "@{triggerBody()?['message']}"
+              }
+            ],
+            "temperature": 0.7,
+            "max_tokens": 500
+          }
+        }
+      },
+      "Parse_Response": {
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@{body('Call_OpenAI')}",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "choices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Response": {
+        "type": "Response",
+        "inputs": {
+          "statusCode": 200,
+          "body": {
+            "response": "@{body('Parse_Response')?['choices']?[0]?['message']?['content']}"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "OpenAI_API_Key": {
+      "type": "securestring",
+      "value": "YOUR_OPENAI_API_KEY_HERE"
+    }
+  }
+}
+

@@ -1,0 +1,27 @@
+{
+  "name": "teams-llm-bot",
+  "version": "1.0.0",
+  "description": "Easy-to-deploy LLM bot for Microsoft Teams",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "teams",
+    "bot",
+    "llm",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "botbuilder": "^4.20.0",
+    "restify": "^11.1.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+
